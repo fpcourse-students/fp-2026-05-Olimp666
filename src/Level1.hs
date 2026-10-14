@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unused-matches #-}
+
 -- | Домашка 5. Типы данных: обязательные задачи.
 module Level1 where
 
@@ -14,16 +15,15 @@ import MetaUtils (todo)
 
 -- E.leafCount E.tree
 predictedLeaves :: Int
-predictedLeaves = todo "1.1 leaves"
+predictedLeaves = 3
 
 -- E.transform (> 2) E.tree
 predictedMapped :: E.Tree Bool
-predictedMapped = todo "1.1 mapped"
+predictedMapped = E.Node (E.Leaf False) False (E.Node (E.Leaf True) True (E.Leaf True))
 
 -- (E.xs, E.ys, E.zs)
 predictedVersions :: ([Int], [Int], [Int])
-predictedVersions = todo "1.1 versions"
-
+predictedVersions = ([3, 4], [1, 3, 4], [2, 1, 3, 4])
 
 -- 1.2. Дерево с произвольным числом детей.
 --
@@ -39,11 +39,12 @@ data IntTree = Leaf | Node Int [IntTree]
 sumIntTree :: IntTree -> Int
 sumIntTree t = case t of
   Leaf -> 0
-  Node x children -> todo "1.2 node"
+  Node x [] -> x
+  Node x children -> x + sumChildren children -- какая-то черная магия
 
 sumChildren :: [IntTree] -> Int
-sumChildren = todo "1.2 children"
-
+sumChildren [] = 0
+sumChildren (x : xs) = sumIntTree x + sumChildren xs
 
 -- 1.3. Все результаты или отказ.
 --
@@ -58,8 +59,9 @@ applyMaybeList f xs = case xs of
   [] -> Just []
   x : rest -> case f x of
     Nothing -> Nothing
-    Just y -> todo "1.3"
-
+    Just y -> case applyMaybeList f rest of
+      Just ys -> Just (y : ys)
+      Nothing -> Nothing
 
 -- 1.4. Контрпример вместо объяснения.
 --
@@ -77,8 +79,7 @@ parsePositiveBuggy :: [Int] -> Maybe [Int]
 parsePositiveBuggy xs = Just (filter (> 0) xs)
 
 badInput :: [Int]
-badInput = todo "1.4"
-
+badInput = [0]
 
 -- 1.5. Вспомните записи.
 --
@@ -92,11 +93,16 @@ data TaskStatus = Planned | Running | Done
   deriving (Eq, Show)
 
 data Task = Task
-  { taskTitle :: String
-  , taskStatus :: TaskStatus
-  , taskAttempts :: Int
+  { taskTitle :: String,
+    taskStatus :: TaskStatus,
+    taskAttempts :: Int
   }
   deriving (Eq, Show)
 
 startTask :: Task -> Task
-startTask = todo "1.5"
+startTask t = case t of
+  Task title status attempts ->
+    Task
+      title
+      (if status == Planned then Running else status)
+      (if status == Planned then attempts + 1 else attempts)
